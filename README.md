@@ -1,12 +1,12 @@
 # FoodieMentor 🍒
 
-**A pixel-art calorie tracker built for the South Asian diaspora.** Log meals the way you actually eat them — "2 rotis and a bowl of dal", a photo of your plate, a packet's barcode, or a recipe from an Instagram caption — and Lilo the lychee turns it into an editable food log.
+**A pixel-art calorie tracker for real, home-cooked food.** Log meals the way you actually eat them — in your own words, a photo of your plate, a packet's barcode, or a recipe from an Instagram caption — and Lilo the lychee turns it into an editable food log.
 
 > Status: in active development (personal project). iOS and Android via Expo.
 
 ## Why
 
-Most calorie apps don't know what *karahi*, *masoor dal* or *a bowl of biryani* is, and they make you weigh everything. FoodieMentor understands home-cooked South Asian food, everyday portions (rotis, bowls, cups, spoons) and UK/US/Canadian packaged food.
+Most calorie apps struggle with home cooking and make you weigh everything. FoodieMentor understands everyday dishes from many cuisines, everyday portions (bowls, cups, spoons, slices) and UK/US/Canadian packaged food.
 
 ## Features
 
@@ -52,7 +52,7 @@ src/components/   UI: Lilo, pixel console, chat, scanner, recipe builder, themes
 src/lib/          Supabase client, session/profile, meal draft logic, calorie goal maths
 supabase/         SQL migrations (schema, RLS, food data) and Edge Functions
 scripts/          dataset import scripts, Lilo pixel-art generator, API test script
-data/             hand-written South Asian search aliases and portion sizes
+data/             hand-written search aliases and everyday portion sizes
 ```
 
 ## Running it locally
