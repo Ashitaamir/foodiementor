@@ -1,0 +1,48 @@
+# FoodieMentor search aliases for UK CoFID 2021 foods.
+# Format:  CoFID code | other names people type (comma separated) | CoFID name (checked by the script)
+# Aliases are search words only. They NEVER change calories or nutrients.
+
+# --- Dal (lentils) ---
+15-764 | dal, daal, dhal, dahl, masoor dal, masoor daal, lentil curry | Curry, lentil, red/masoor dahl, with vegetable oil, homemade
+15-763 | dal, daal, dhal, dahl, masoor dal, masoor daal | Curry, lentil, red/masoor dahl, with butter, homemade
+15-641 | chana dal, chana daal, cholar dal | Curry, chick pea dhal, homemade
+15-768 | moong dal, mung dal, moong daal, muger dal | Curry, mung bean dahl, Bengali, homemade
+15-780 | toor dal, tuvar dal, arhar dal | Curry, pigeon pea dahl, with vegetable oil, homemade
+
+# --- Breads ---
+11-459 | chapati, chapatti, roti, phulka | Chapatis, made without fat
+11-987 | chapati, chapatti, roti | Chapatis, made with fat, retail
+11-1104 | paratha, parantha, parotta, porota | Paratha, homemade
+11-911 | poori | Puri, homemade
+11-973 | naan, nan | Bread, naan, retail
+
+# --- Rice ---
+11-858 | bhaat, bhat, chawal, chaval | Rice, white, basmati, boiled in unsalted water
+11-968 | pulao, pulav, polao | Rice, pilau, plain, homemade
+19-454 | chicken biryani, biriyani, biriani | Biryani, chicken, takeaway
+15-528 | khichdi, khichuri, khichri | Khichadi, with butter ghee
+
+# --- Vegetables ---
+15-685 | bhindi, bhindi bhaji, dherosh, dherosh bhaji, okra bhaji | Bhaji, okra, Bangladeshi, with vegetable oil, homemade
+15-627 | bhindi sabzi, bhindi masala | Curry, bhindi subji, homemade
+15-629 | sag, shak | Saag, homemade
+15-628 | aloo methi | Methi aloo, homemade
+15-679 | aloo gobi, alu gobi | Bhaji, cauliflower and potato, homemade
+15-693 | aloo bhaji, alu bhaji, alur bhaji, aloo sabzi | Bhaji, potato, with vegetable oil, homemade
+15-739 | bombay aloo | Curry, Bombay potato, homemade
+15-108 | chana masala, chole, chhole, chickpea curry | Curry, chick pea, whole and tomato, Punjabi, with vegetable oil, homemade
+15-146 | rajma, rajma masala | Curry, red kidney bean, Punjabi, homemade
+
+# --- Meat & fish ---
+19-296 | chicken tikka masala, tikka masala | Curry, chicken tikka masala, retail, reheated
+19-565 | chicken korma, korma | Curry, chicken korma, homemade
+16-446 | fish curry, macher jhol, maacher jhol | Curry, fish, Bangladeshi, homemade
+
+# --- Snacks & sweets ---
+15-305 | samosa, singara, shingara | Samosas, vegetable, retail
+15-828 | onion bhaji, onion bhajee, onion pakora | Pakora/bhajia, onion, fried in vegetable oil, homemade
+11-1081 | gulab jamun, golap jam | Gulab jamen/jambu, homemade
+12-373 | sweet lassi, lassi | Lassi, sweetened
+17-832 | raitha | Raita, homemade
+12-495 | paneer, panir | Cheese, Paneer
+17-640 | ghee, ghi | Ghee, butter
