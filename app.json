@@ -25,10 +25,11 @@
     },
     "plugins": [
       "expo-router",
+      "expo-sqlite",
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#208AEF",
+          "backgroundColor": "#F5C0BA",
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 76
         }
