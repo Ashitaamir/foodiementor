@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabase';
 
 const ITEMS: { label: string; hint: string; href?: Href }[] = [
   { label: 'Settings', hint: 'Goals and workouts', href: '/settings' },
+  { label: 'Retake survey', hint: 'Update your weight, activity or goal', href: '/setup' },
   { label: 'Themes', hint: 'Colorful or dark', href: '/themes' },
   { label: 'Account', hint: 'Email and sign out', href: '/account' },
   { label: 'Sign up / Sign in', hint: 'Back to the start screen' },
