@@ -1,8 +1,9 @@
 import { FunctionsHttpError } from '@supabase/supabase-js';
 import { CameraView, useCameraPermissions, type BarcodeScanningResult } from 'expo-camera';
 import { router } from 'expo-router';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { withCommas } from '@/components/calorie-bar';
@@ -23,6 +24,57 @@ type Product = {
 };
 
 const BARCODE_TYPES = ['ean13', 'ean8', 'upc_a', 'upc_e'] as const;
+const FOOD_BARCODE = /^[0-9]{8,14}$/;
+const BOX_PADDING = 14; // room around a found barcode so the frame hugs it, not cuts it
+const GUIDE_HEIGHT = 150;
+
+type Box = { x: number; y: number; width: number; height: number };
+
+// The yellow frame: a big guide in the middle, which springs onto a barcode once seen
+function ScanFrame({ area, found }: { area: Box | null; found: Box | null }) {
+  const x = useSharedValue(0);
+  const y = useSharedValue(0);
+  const width = useSharedValue(0);
+  const height = useSharedValue(0);
+
+  useEffect(() => {
+    if (!area) return;
+    const guide = {
+      x: area.width * 0.06,
+      y: (area.height - GUIDE_HEIGHT) / 2,
+      width: area.width * 0.88,
+      height: GUIDE_HEIGHT,
+    };
+    // Keep the frame inside the camera view
+    const target = found
+      ? {
+          x: Math.max(4, found.x - BOX_PADDING),
+          y: Math.max(4, found.y - BOX_PADDING),
+          width: Math.min(area.width - 8, found.width + BOX_PADDING * 2),
+          height: Math.min(area.height - 8, Math.max(60, found.height + BOX_PADDING * 2)),
+        }
+      : guide;
+    const spring = { damping: 16, stiffness: 180 };
+    x.set(withSpring(target.x, spring));
+    y.set(withSpring(target.y, spring));
+    width.set(withSpring(target.width, spring));
+    height.set(withSpring(target.height, spring));
+  }, [area, found, x, y, width, height]);
+
+  const frameStyle = useAnimatedStyle(() => ({
+    left: x.get(),
+    top: y.get(),
+    width: width.get(),
+    height: height.get(),
+  }));
+
+  return (
+    <Animated.View
+      pointerEvents="none"
+      style={[styles.scanBox, found && styles.scanBoxFound, frameStyle]}
+    />
+  );
+}
 
 // "Scan with camera": snap a plate (Lilo identifies it in the chat) or scan a packet's barcode.
 export function ScanFood() {
@@ -34,6 +86,8 @@ export function ScanFood() {
   const [product, setProduct] = useState<Product | null>(null);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [cameraArea, setCameraArea] = useState<Box | null>(null);
+  const [found, setFound] = useState<Box | null>(null);
 
   // A photo hands over to the chat, where Lilo looks at it and asks quick questions
   if (photo) {
@@ -61,29 +115,52 @@ export function ScanFood() {
     if (picked) setPhoto(picked);
   };
 
+  // After a failed lookup, show why, then let the frame go back to searching
+  const tryAgainSoon = (reason: string) => {
+    setMessage(reason);
+    setTimeout(() => {
+      setFound(null);
+      scanning.current = false;
+    }, 2000);
+  };
+
   const onBarcode = async (result: BarcodeScanningResult) => {
     if (scanning.current) return;
+    const code = result.data?.trim() ?? '';
+    if (!FOOD_BARCODE.test(code)) return;
     scanning.current = true;
+
+    // Jump the yellow frame onto the barcode (bounds can be empty on some phones)
+    const { origin, size } = result.bounds ?? {};
+    if (origin && size && size.width > 0 && size.height > 0) {
+      setFound({ x: origin.x, y: origin.y, width: size.width, height: size.height });
+    } else if (cameraArea) {
+      setFound({ x: cameraArea.width * 0.15, y: cameraArea.height / 2 - 40, width: cameraArea.width * 0.7, height: 80 });
+    }
     setBusy(true);
-    setMessage(null);
+    setMessage(`Found ${code}! Looking it up…`);
+
     const { data, error } = await supabase.functions.invoke('lookup-barcode', {
-      body: { barcode: result.data },
+      body: { barcode: code },
     });
     setBusy(false);
     if (error) {
-      let reason = 'Could not look that up. Please try again.';
+      let reason = `Could not look up ${code}. Please try again.`;
       if (error instanceof FunctionsHttpError) {
         const body = await error.context.json().catch(() => null);
         if (body?.error) reason = body.error;
       }
-      setMessage(reason);
-      // Let the user try another barcode after a moment
-      setTimeout(() => {
-        scanning.current = false;
-      }, 1500);
+      console.warn('Barcode lookup failed:', code, reason);
+      tryAgainSoon(reason);
+      return;
+    }
+    if (!data?.product) {
+      tryAgainSoon("Lilo couldn't find this product yet.");
       return;
     }
     setProduct(data.product as Product);
+    setFound(null);
+    setMessage(null);
     scanning.current = false;
   };
 
@@ -126,7 +203,13 @@ export function ScanFood() {
         </View>
       ) : (
         <View style={styles.flex}>
-          <View style={styles.cameraFrame}>
+          <View
+            style={styles.cameraFrame}
+            onLayout={(event) => {
+              const { width, height } = event.nativeEvent.layout;
+              // Inside the 4 px border, which is where the camera picture is drawn
+              setCameraArea({ x: 0, y: 0, width: width - 8, height: height - 8 });
+            }}>
             <CameraView
               ref={camera}
               style={styles.flex}
@@ -134,14 +217,14 @@ export function ScanFood() {
               barcodeScannerSettings={{ barcodeTypes: [...BARCODE_TYPES] }}
               onBarcodeScanned={mode === 'barcode' ? onBarcode : undefined}
             />
-            {mode === 'barcode' && <View style={styles.scanBox} pointerEvents="none" />}
+            {mode === 'barcode' && <ScanFrame area={cameraArea} found={found} />}
           </View>
 
           <Text style={styles.body} accessibilityLiveRegion="polite">
             {message ??
               (mode === 'photo'
                 ? 'Fit your whole plate in the picture.'
-                : 'Point the camera at the barcode on the packet.')}
+                : 'Hold the packet about a hand-length away (20 cm) so the barcode is sharp, then keep still.')}
           </Text>
 
           {busy && <ActivityIndicator color={colors.navy} />}
@@ -369,13 +452,13 @@ const styles = StyleSheet.create({
   },
   scanBox: {
     position: 'absolute',
-    left: '12%',
-    right: '12%',
-    top: '38%',
-    height: 110,
     borderWidth: 4,
     borderColor: colors.arcadeYellow,
     borderRadius: 10,
+  },
+  scanBoxFound: {
+    borderColor: colors.leafGreen, // turns green once a barcode is locked on
+    borderWidth: 5,
   },
   body: {
     fontFamily: fonts.bodyBold,
