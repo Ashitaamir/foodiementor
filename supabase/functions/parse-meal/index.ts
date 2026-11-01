@@ -73,6 +73,16 @@ export default {
       );
     }
 
+    // Daily limit: checked before calling Claude, so over-limit requests cost nothing
+    const { data: allowed, error: limitError } = await ctx.supabase.rpc("use_ai_request");
+    if (limitError) throw limitError;
+    if (!allowed) {
+      return Response.json(
+        { error: "Daily AI limit reached, try again tomorrow." },
+        { status: 429 },
+      );
+    }
+
     // 1. Claude: split the text into foods (names + amounts only)
     let parsed: ParsedItem[] | null;
     try {
