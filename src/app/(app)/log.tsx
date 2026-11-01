@@ -4,6 +4,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Lilo } from '@/components/lilo';
 import type { LogMode } from '@/components/log-console';
+import { MealChat } from '@/components/meal-chat';
+import { RecipeBuilder, RecipeServing } from '@/components/recipe-builder';
+import { ScanFood } from '@/components/scan-food';
 import { colors, fonts } from '@/constants/fm-theme';
 
 const TITLES: Record<LogMode, string> = {
@@ -14,10 +17,23 @@ const TITLES: Record<LogMode, string> = {
   instagram: 'RECIPE FROM INSTA',
 };
 
-// Placeholder for each way of logging; each one is built in its own step.
+// Each way of logging gets its own screen; the ones not built yet show "coming soon".
 export default function LogMealScreen() {
-  const { mode } = useLocalSearchParams<{ mode?: LogMode }>();
-  const title = (mode && TITLES[mode]) || 'LOG A MEAL';
+  const { mode, recipe } = useLocalSearchParams<{ mode?: LogMode | 'serving'; recipe?: string }>();
+  const title = (mode && mode !== 'serving' && TITLES[mode]) || 'LOG A MEAL';
+
+  if (mode === 'serving' && recipe) {
+    return <RecipeServing recipeId={recipe} />;
+  }
+  if (mode === 'chat') {
+    return <MealChat />;
+  }
+  if (mode === 'scan') {
+    return <ScanFood />;
+  }
+  if (mode === 'recipe' || mode === 'batch' || mode === 'instagram') {
+    return <RecipeBuilder kind={mode} />;
+  }
 
   return (
     <SafeAreaView style={styles.screen}>
@@ -40,7 +56,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 16,
     padding: 24,
-    backgroundColor: colors.blush,
+    backgroundColor: colors.background,
   },
   title: {
     fontFamily: fonts.pixel,

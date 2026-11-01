@@ -7,6 +7,7 @@ const SEGMENTS = 20;
 type Props = {
   eaten: number;
   goal: number;
+  burned?: number; // calories burned today, shown when they're added back to the goal
 };
 
 export function withCommas(value: number) {
@@ -14,7 +15,7 @@ export function withCommas(value: number) {
 }
 
 // A game-style "health bar" made of pixel blocks that fills as the day's calories add up.
-export function CalorieBar({ eaten, goal }: Props) {
+export function CalorieBar({ eaten, goal, burned = 0 }: Props) {
   const over = eaten > goal;
   const filled = goal > 0 ? Math.min(SEGMENTS, Math.round((eaten / goal) * SEGMENTS)) : 0;
   const left = Math.abs(goal - eaten);
@@ -34,6 +35,9 @@ export function CalorieBar({ eaten, goal }: Props) {
       <Text style={styles.numbers}>
         {withCommas(eaten)} <Text style={styles.goal}>/ {withCommas(goal)} kcal</Text>
       </Text>
+      {burned > 0 && (
+        <Text style={styles.burned}>Includes +{withCommas(burned)} kcal burned from workouts</Text>
+      )}
       <View style={styles.bar}>
         {Array.from({ length: SEGMENTS }, (_, index) => (
           <View
@@ -77,10 +81,17 @@ const styles = StyleSheet.create({
   summaryOver: {
     color: colors.berry,
   },
+  // Numbers stay in the readable body font; pixel font is only for labels
   numbers: {
-    fontFamily: fonts.pixel,
-    fontSize: 20,
+    fontFamily: fonts.bodyHeavy,
+    fontSize: 30,
     color: colors.navy,
+    fontVariant: ['tabular-nums'],
+  },
+  burned: {
+    fontFamily: fonts.bodyBold,
+    fontSize: 13,
+    color: colors.plum,
   },
   goal: {
     fontFamily: fonts.bodyHeavy,

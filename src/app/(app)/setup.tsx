@@ -614,7 +614,7 @@ export default function SetupScreen() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: colors.blush,
+    backgroundColor: colors.background,
   },
   flex: {
     flex: 1,

@@ -11,6 +11,8 @@ export type DayTotals = {
   fibre_g: number;
   item_count: number;
   daily_calorie_goal: number | null;
+  burned_kcal: number;
+  add_burned_calories: boolean;
 };
 
 export type DayLog = {

@@ -20,7 +20,7 @@ function RootNavigator() {
   const { session } = useSession();
   return (
     <Stack
-      screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.blush } }}>
+      screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.background } }}>
       <Stack.Protected guard={!!session} redirectTo="/sign-in">
         <Stack.Screen name="(app)" />
       </Stack.Protected>

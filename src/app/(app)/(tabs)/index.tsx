@@ -4,7 +4,7 @@ import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'r
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { CalorieBar, withCommas } from '@/components/calorie-bar';
-import { Lilo } from '@/components/lilo';
+import { LiloMoodArt, PeekingLilo } from '@/components/lilo';
 import { LogConsole } from '@/components/log-console';
 import { colors, fonts } from '@/constants/fm-theme';
 import { useProfile } from '@/lib/profile';
@@ -29,7 +29,14 @@ export default function HomeScreen() {
   const { totals, logs, error, load } = useToday();
   const [refreshing, setRefreshing] = useState(false);
   const imperial = profile?.unit_system === 'imperial';
-  const goal = totals?.daily_calorie_goal ?? profile?.daily_calorie_goal ?? 0;
+  const baseGoal = totals?.daily_calorie_goal ?? profile?.daily_calorie_goal ?? 0;
+  const burned = Math.round(Number(totals?.burned_kcal ?? 0));
+  const addBurned = totals?.add_burned_calories ?? profile?.add_burned_calories ?? false;
+  // If chosen in the survey, workouts earn extra calories for the day
+  const goal = addBurned ? baseGoal + burned : baseGoal;
+  const eaten = Number(totals?.energy_kcal ?? 0);
+  // Lilo winks once today's calories land close to the goal
+  const goalHit = goal > 0 && eaten >= goal * 0.9 && eaten <= goal * 1.05;
 
   // Reload whenever Home comes back into view (e.g. after logging a meal)
   useFocusEffect(
@@ -52,23 +59,34 @@ export default function HomeScreen() {
   ];
 
   return (
-    <SafeAreaView style={styles.screen}>
+    <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
       <ScrollView
         contentContainerStyle={styles.content}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.navy} />
         }>
         <View style={styles.greeting}>
-          <Lilo pixelSize={3} bob />
+          <LiloMoodArt mood={goalHit ? 'goal' : 'welcome'} pixelSize={2} bob />
           <View style={styles.greetingText}>
             <Text style={styles.hello} accessibilityRole="header">
               Hi, {profile?.display_name ?? 'player'}!
             </Text>
-            <Text style={styles.subtle}>Let&apos;s see how today is going.</Text>
+            <Text style={styles.subtle}>
+              {goalHit ? 'Goal reached today. Nice one!' : 'Let’s see how today is going.'}
+            </Text>
           </View>
         </View>
 
-        <CalorieBar eaten={Number(totals?.energy_kcal ?? 0)} goal={goal} />
+        <CalorieBar
+          eaten={eaten}
+          goal={goal}
+          burned={addBurned ? burned : 0}
+        />
+        {!addBurned && burned > 0 && (
+          <Text style={styles.subtle}>
+            You burned {withCommas(burned)} kcal in workouts today (not added to your goal).
+          </Text>
+        )}
 
         <View style={styles.macroGrid}>
           {macros.map((macro) => (
@@ -92,7 +110,7 @@ export default function HomeScreen() {
           {error && <Text style={styles.error}>{error}</Text>}
           {!error && logs.length === 0 && (
             <View style={styles.empty}>
-              <Lilo pixelSize={4} />
+              <LiloMoodArt mood="sleepy" pixelSize={3} />
               <Text style={styles.emptyText}>Nothing logged yet. Tell Lilo what you ate!</Text>
             </View>
           )}
@@ -126,6 +144,7 @@ export default function HomeScreen() {
           Agriculture FoodData Central.
         </Text>
       </ScrollView>
+      <PeekingLilo side="right" pixelSize={5} />
     </SafeAreaView>
   );
 }
@@ -133,12 +152,13 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: colors.blush,
+    backgroundColor: colors.background,
   },
   content: {
     gap: 18,
     paddingHorizontal: 22,
-    paddingVertical: 16,
+    paddingTop: 16,
+    paddingBottom: 90, // room so the peeking Lilo doesn't cover the last row
   },
   greeting: {
     flexDirection: 'row',

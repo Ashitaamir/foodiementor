@@ -55,9 +55,9 @@ function SignedInNavigator() {
   const complete = isProfileComplete(profile);
   return (
     <Stack
-      screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.blush } }}>
+      screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.background } }}>
       <Stack.Protected guard={complete} redirectTo="/setup">
-        <Stack.Screen name="index" />
+        <Stack.Screen name="(tabs)" />
         <Stack.Screen name="log" />
       </Stack.Protected>
       {/* Open to everyone signed in: first-time setup, or retaking the survey later */}
@@ -81,7 +81,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 16,
     padding: 24,
-    backgroundColor: colors.blush,
+    backgroundColor: colors.background,
   },
   error: {
     fontFamily: fonts.bodyBold,

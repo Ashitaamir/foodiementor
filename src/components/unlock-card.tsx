@@ -10,6 +10,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
+import { LiloMoodArt } from '@/components/lilo';
 import { colors, fonts } from '@/constants/fm-theme';
 
 export type UnlockItem = {
@@ -87,6 +88,9 @@ export function UnlockCard({ item, onPlay, onClose }: Props) {
                 <Text style={styles.number}>{item.number}</Text>
                 <Text style={styles.title}>{item.title}</Text>
               </View>
+              <View style={styles.mascot}>
+                <LiloMoodArt mood="goal" pixelSize={3} />
+              </View>
               <Text style={styles.detail}>{item.detail}</Text>
             </Animated.View>
 
@@ -149,6 +153,9 @@ const styles = StyleSheet.create({
     textShadowColor: colors.lycheePink,
     textShadowOffset: { width: 3, height: 3 },
     textShadowRadius: 0,
+  },
+  mascot: {
+    alignItems: 'center',
   },
   card: {
     width: 250,

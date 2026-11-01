@@ -1,12 +1,12 @@
-// FoodieMentor look: blush background, navy text, pixel accents.
+// FoodieMentor look: lavender arcade background, navy text, pixel accents.
 export const colors = {
-  blush: '#F5C0BA',
+  background: '#DCD3F7', // lavender arcade
   navy: '#1B1B3A',
   cream: '#FFF8F0',
   plum: '#4A2A3A',
   berry: '#7A1235',
   placeholder: '#6E4E5A',
-  fieldLine: '#D98E87',
+  fieldLine: '#A99CDB',
   lycheePink: '#FF5C8A',
   lycheeRed: '#E8325F',
   arcadeYellow: '#FFD23F',

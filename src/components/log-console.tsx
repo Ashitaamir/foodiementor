@@ -11,13 +11,50 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
+import { PixelArt, toPixelRows } from '@/components/pixel-art';
 import { UnlockCard } from '@/components/unlock-card';
 import { colors, fonts } from '@/constants/fm-theme';
 
 export type LogMode = 'scan' | 'chat' | 'recipe' | 'batch' | 'instagram';
 
-const SILVER = 'linear-gradient(180deg, #F1F3F6, #CDD2DA 45%, #AEB4BE)';
+// Hard colour bands instead of a smooth gradient, so the silver looks pixel-shaded
+const SILVER =
+  'linear-gradient(180deg, #F1F3F6 0%, #F1F3F6 16%, #CDD2DA 16%, #CDD2DA 74%, #AEB4BE 74%, #AEB4BE 100%)';
+const PX = 4; // size of one "pixel" in the console's outline and buttons
 const CONSOLE_HEIGHT = 150;
+const SCANLINES = 14;
+
+// Stepped corner (top-left); flipped for the other three corners.
+// b = page background, O = outline, . = see-through
+const CORNER = ['bbOO', 'bO..', 'O...', 'O...'];
+const flipX = (map: string[]) => map.map((row) => row.split('').reverse().join(''));
+const flipY = (map: string[]) => [...map].reverse();
+const CORNER_COLORS = { b: colors.background, O: colors.navy };
+const CORNERS = {
+  topLeft: toPixelRows(CORNER, CORNER_COLORS),
+  topRight: toPixelRows(flipX(CORNER), CORNER_COLORS),
+  bottomLeft: toPixelRows(flipY(CORNER), CORNER_COLORS),
+  bottomRight: toPixelRows(flipY(flipX(CORNER)), CORNER_COLORS),
+};
+
+// A round pixel button: O outline, C colour, H shine
+const ROUND_BUTTON = ['..OOO..', '.OCCCO.', 'OCHCCCO', 'OCCCCCO', 'OCCCCCO', '.OCCCO.', '..OOO..'];
+const BUTTON_A = toPixelRows(ROUND_BUTTON, { O: colors.navy, C: colors.lycheePink, H: '#FFFFFF' });
+const BUTTON_B = toPixelRows(ROUND_BUTTON, { O: colors.navy, C: colors.berry, H: '#FF9EB8' });
+
+// Pixel D-pad: N = navy, h = highlight
+const DPAD = [
+  '...NNN...',
+  '...NhN...',
+  '...NNN...',
+  'NNNNNNNNN',
+  'NhNNNNNhN',
+  'NNNNNNNNN',
+  '...NNN...',
+  '...NhN...',
+  '...NNN...',
+];
+const DPAD_ROWS = toPixelRows(DPAD, { N: colors.navy, h: '#3A3A70' });
 const CARD_WIDTH = 78;
 const CARD_HEIGHT = 136;
 const FAN_SPACE = 170; // room above the console for the fanned-out cartridges
@@ -136,14 +173,18 @@ export function LogConsole({ onSelect }: Props) {
         accessibilityState={{ expanded: open }}
         onPress={() => setOpen((value) => !value)}
         style={({ pressed }) => [styles.console, pressed && styles.consolePressed]}>
-        <View style={styles.dpad} aria-hidden>
-          <View style={styles.dpadVertical} />
-          <View style={styles.dpadHorizontal} />
+        <View aria-hidden>
+          <PixelArt rows={DPAD_ROWS} pixelSize={6} />
         </View>
 
         <View style={styles.bezel}>
           <View style={styles.powerLight} aria-hidden />
           <View style={styles.screen}>
+            <View style={styles.scanlines} aria-hidden pointerEvents="none">
+              {Array.from({ length: SCANLINES }, (_, index) => (
+                <View key={index} style={styles.scanline} />
+              ))}
+            </View>
             <Text style={styles.screenTitle}>{open ? 'PICK A GAME' : 'LOG A MEAL'}</Text>
             <Animated.Text style={[styles.screenHint, blinkStyle]}>
               {open ? 'TAP ONE' : 'PRESS START'}
@@ -152,13 +193,31 @@ export function LogConsole({ onSelect }: Props) {
         </View>
 
         <View style={styles.buttons} aria-hidden>
-          <View style={[styles.roundButton, styles.buttonB]} />
-          <View style={[styles.roundButton, styles.buttonA]} />
+          <View style={styles.buttonB}>
+            <PixelArt rows={BUTTON_B} pixelSize={PX} />
+          </View>
+          <View style={styles.buttonA}>
+            <PixelArt rows={BUTTON_A} pixelSize={PX} />
+          </View>
         </View>
 
         <View style={styles.pills} aria-hidden>
           <View style={styles.pill} />
           <View style={styles.pill} />
+        </View>
+
+        {/* Stepped corners drawn on top of the square body */}
+        <View style={[styles.corner, { top: -PX, left: -PX }]} aria-hidden pointerEvents="none">
+          <PixelArt rows={CORNERS.topLeft} pixelSize={PX} />
+        </View>
+        <View style={[styles.corner, { top: -PX, right: -PX }]} aria-hidden pointerEvents="none">
+          <PixelArt rows={CORNERS.topRight} pixelSize={PX} />
+        </View>
+        <View style={[styles.corner, { bottom: -PX, left: -PX }]} aria-hidden pointerEvents="none">
+          <PixelArt rows={CORNERS.bottomLeft} pixelSize={PX} />
+        </View>
+        <View style={[styles.corner, { bottom: -PX, right: -PX }]} aria-hidden pointerEvents="none">
+          <PixelArt rows={CORNERS.bottomRight} pixelSize={PX} />
         </View>
       </Pressable>
     </View>
@@ -226,35 +285,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 12,
     paddingHorizontal: 16,
-    borderRadius: 28,
-    borderWidth: 3,
+    borderWidth: PX,
     borderColor: colors.navy,
     backgroundImage: SILVER,
-    boxShadow: `5px 5px 0 ${colors.navy}`,
+    boxShadow: `${PX * 2}px ${PX * 2}px 0 ${colors.navy}`,
   },
   consolePressed: {
-    transform: [{ translateX: 3 }, { translateY: 3 }],
-    boxShadow: `2px 2px 0 ${colors.navy}`,
+    transform: [{ translateX: PX }, { translateY: PX }],
+    boxShadow: `${PX}px ${PX}px 0 ${colors.navy}`,
   },
-  dpad: {
-    width: 54,
-    height: 54,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  dpadVertical: {
+  corner: {
     position: 'absolute',
-    width: 18,
-    height: 54,
-    borderRadius: 4,
-    backgroundColor: colors.navy,
-  },
-  dpadHorizontal: {
-    position: 'absolute',
-    width: 54,
-    height: 18,
-    borderRadius: 4,
-    backgroundColor: colors.navy,
   },
   bezel: {
     flex: 1,
@@ -263,13 +304,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 6,
     padding: 8,
-    borderRadius: 12,
+    borderWidth: PX,
+    borderTopColor: '#14142C',
+    borderLeftColor: '#14142C',
+    borderBottomColor: '#3A3A70',
+    borderRightColor: '#3A3A70',
     backgroundColor: '#2A2A55',
   },
   powerLight: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
+    width: PX * 2,
+    height: PX * 2,
     backgroundColor: colors.lycheeRed,
   },
   screen: {
@@ -278,8 +322,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    borderRadius: 6,
+    overflow: 'hidden',
     backgroundColor: '#9FD8A8',
+  },
+  scanlines: {
+    ...StyleSheet.absoluteFill,
+    justifyContent: 'space-between',
+  },
+  scanline: {
+    height: 1,
+    backgroundColor: 'rgba(27, 27, 58, 0.12)',
   },
   screenTitle: {
     fontFamily: fonts.pixel,
@@ -295,23 +347,15 @@ const styles = StyleSheet.create({
     width: 54,
     height: 70,
   },
-  roundButton: {
-    position: 'absolute',
-    width: 26,
-    height: 26,
-    borderRadius: 13,
-    borderWidth: 3,
-    borderColor: colors.navy,
-  },
   buttonB: {
+    position: 'absolute',
     left: 0,
-    bottom: 6,
-    backgroundColor: colors.berry,
+    bottom: 4,
   },
   buttonA: {
+    position: 'absolute',
     right: 0,
-    top: 6,
-    backgroundColor: colors.lycheePink,
+    top: 4,
   },
   pills: {
     position: 'absolute',
@@ -323,9 +367,8 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   pill: {
-    width: 26,
-    height: 7,
-    borderRadius: 4,
+    width: PX * 6,
+    height: PX * 2,
     backgroundColor: colors.navy,
   },
   cardSlot: {
@@ -340,12 +383,10 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 6,
     gap: 6,
-    borderRadius: 8,
-    borderTopRightRadius: 2,
     borderWidth: 3,
     borderColor: colors.navy,
     backgroundColor: colors.cream,
-    boxShadow: `3px 3px 0 ${colors.navy}`,
+    boxShadow: `${PX}px ${PX}px 0 ${colors.navy}`,
   },
   cardPressed: {
     transform: [{ translateY: 2 }],
@@ -356,7 +397,7 @@ const styles = StyleSheet.create({
     right: -3,
     width: 14,
     height: 10,
-    backgroundColor: colors.blush,
+    backgroundColor: colors.background,
     borderLeftWidth: 3,
     borderBottomWidth: 3,
     borderColor: colors.navy,
@@ -365,7 +406,6 @@ const styles = StyleSheet.create({
     flex: 1,
     gap: 4,
     padding: 5,
-    borderRadius: 4,
     borderWidth: 2,
     borderColor: colors.navy,
   },

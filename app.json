@@ -29,9 +29,25 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#F5C0BA",
+          "backgroundColor": "#DCD3F7",
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 76
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "FoodieMentor uses your camera to scan your meals and food barcodes.",
+          "recordAudioAndroid": false,
+          "barcodeScannerEnabled": true
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "FoodieMentor uses your photos so you can log a meal or recipe screenshot.",
+          "cameraPermission": "FoodieMentor uses your camera to scan your meals and food barcodes.",
+          "microphonePermission": false
         }
       ]
     ],
