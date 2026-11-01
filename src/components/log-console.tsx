@@ -17,9 +17,8 @@ import { colors, fonts } from '@/constants/fm-theme';
 
 export type LogMode = 'scan' | 'chat' | 'recipe' | 'batch' | 'instagram';
 
-// Hard colour bands instead of a smooth gradient, so the silver looks pixel-shaded
-const SILVER =
-  'linear-gradient(180deg, #F1F3F6 0%, #F1F3F6 16%, #CDD2DA 16%, #CDD2DA 74%, #AEB4BE 74%, #AEB4BE 100%)';
+// Hard colour bands instead of a smooth gradient, so the body looks pixel-shaded
+const SILVER = colors.consoleBody;
 const PX = 4; // size of one "pixel" in the console's outline and buttons
 const CONSOLE_HEIGHT = 150;
 const SCANLINES = 14;
@@ -54,7 +53,7 @@ const DPAD = [
   '...NhN...',
   '...NNN...',
 ];
-const DPAD_ROWS = toPixelRows(DPAD, { N: colors.navy, h: '#3A3A70' });
+const DPAD_ROWS = toPixelRows(DPAD, { N: colors.navy, h: colors.inkSoft });
 const CARD_WIDTH = 78;
 const CARD_HEIGHT = 136;
 const FAN_SPACE = 170; // room above the console for the fanned-out cartridges
@@ -87,14 +86,14 @@ const MODES: { mode: LogMode; title: string; hint: string; detail: string; color
     title: 'Meal prep batch',
     hint: 'Cook once, eat all week',
     detail: 'Cook a big batch once, then log one portion at a time all week.',
-    color: '#5CC8FF',
+    color: colors.sky,
   },
   {
     mode: 'instagram',
     title: 'Insta recipe',
     hint: 'Paste a caption or screenshot',
     detail: 'Paste a recipe caption or screenshot from Instagram and Lilo will read it.',
-    color: '#B07CFF',
+    color: colors.grape,
   },
 ];
 
@@ -305,11 +304,11 @@ const styles = StyleSheet.create({
     gap: 6,
     padding: 8,
     borderWidth: PX,
-    borderTopColor: '#14142C',
-    borderLeftColor: '#14142C',
-    borderBottomColor: '#3A3A70',
-    borderRightColor: '#3A3A70',
-    backgroundColor: '#2A2A55',
+    borderTopColor: colors.inkDeep,
+    borderLeftColor: colors.inkDeep,
+    borderBottomColor: colors.inkSoft,
+    borderRightColor: colors.inkSoft,
+    backgroundColor: colors.bezel,
   },
   powerLight: {
     width: PX * 2,
@@ -323,7 +322,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 8,
     overflow: 'hidden',
-    backgroundColor: '#9FD8A8',
+    backgroundColor: colors.screen,
   },
   scanlines: {
     ...StyleSheet.absoluteFill,
@@ -336,12 +335,12 @@ const styles = StyleSheet.create({
   screenTitle: {
     fontFamily: fonts.pixel,
     fontSize: 11,
-    color: colors.navy,
+    color: colors.onAccent,
   },
   screenHint: {
     fontFamily: fonts.pixel,
     fontSize: 7,
-    color: colors.navy,
+    color: colors.onAccent,
   },
   buttons: {
     width: 54,
@@ -412,13 +411,13 @@ const styles = StyleSheet.create({
   cardNumber: {
     fontFamily: fonts.pixel,
     fontSize: 10,
-    color: colors.navy,
+    color: colors.onAccent,
   },
   cardTitle: {
     fontFamily: fonts.bodyHeavy,
     fontSize: 12,
     lineHeight: 15,
-    color: colors.navy,
+    color: colors.onAccent,
   },
   cardHint: {
     fontFamily: fonts.bodyBold,

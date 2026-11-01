@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
     fontFamily: fonts.bodyBold,
     fontSize: 14,
     lineHeight: 19,
-    color: '#D9D6F2',
+    color: colors.onInkMuted,
     textAlign: 'center',
   },
   scanlines: {

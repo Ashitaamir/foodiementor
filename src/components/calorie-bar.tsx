@@ -109,7 +109,7 @@ const styles = StyleSheet.create({
   segment: {
     flex: 1,
     height: 18,
-    backgroundColor: '#3A3A70',
+    backgroundColor: colors.inkSoft,
   },
   segmentFilled: {
     backgroundColor: colors.lycheePink,

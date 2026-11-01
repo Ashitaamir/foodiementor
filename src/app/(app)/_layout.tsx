@@ -59,6 +59,9 @@ function SignedInNavigator() {
       <Stack.Protected guard={complete} redirectTo="/setup">
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="log" />
+        <Stack.Screen name="settings" />
+        <Stack.Screen name="themes" />
+        <Stack.Screen name="account" />
       </Stack.Protected>
       {/* Open to everyone signed in: first-time setup, or retaking the survey later */}
       <Stack.Screen name="setup" />

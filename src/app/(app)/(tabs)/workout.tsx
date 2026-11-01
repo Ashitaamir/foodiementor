@@ -162,7 +162,7 @@ export default function WorkoutScreen() {
                           setMessage(null);
                         }}
                         style={[styles.chip, active && styles.chipActive]}>
-                        <Text style={styles.chipText}>{activity.name}</Text>
+                        <Text style={[styles.chipText, active && styles.chipTextActive]}>{activity.name}</Text>
                       </Pressable>
                     );
                   })}
@@ -182,7 +182,9 @@ export default function WorkoutScreen() {
                     accessibilityState={{ selected: minutesNumber === value }}
                     onPress={() => setMinutes(String(value))}
                     style={[styles.chip, minutesNumber === value && styles.chipActive]}>
-                    <Text style={styles.chipText}>{value} min</Text>
+                    <Text style={[styles.chipText, minutesNumber === value && styles.chipTextActive]}>
+                      {value} min
+                    </Text>
                   </Pressable>
                 ))}
               </View>
@@ -290,6 +292,7 @@ const styles = StyleSheet.create({
   },
   chipActive: { backgroundColor: colors.arcadeYellow, boxShadow: `3px 3px 0 ${colors.navy}` },
   chipText: { fontFamily: fonts.bodyHeavy, fontSize: 14, color: colors.navy },
+  chipTextActive: { color: colors.onAccent },
   card: {
     gap: 10,
     padding: 16,
@@ -303,7 +306,7 @@ const styles = StyleSheet.create({
     minHeight: 52,
     borderWidth: 3,
     borderColor: colors.navy,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.field,
     color: colors.navy,
     fontFamily: fonts.bodyHeavy,
     fontSize: 18,

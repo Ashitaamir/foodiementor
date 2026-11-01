@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { CalorieBar, withCommas } from '@/components/calorie-bar';
 import { LiloMoodArt, PeekingLilo } from '@/components/lilo';
+import { LiloMenu } from '@/components/lilo-menu';
 import { LogConsole } from '@/components/log-console';
 import { PixelArt, toPixelRows } from '@/components/pixel-art';
 import { colors, fonts } from '@/constants/fm-theme';
@@ -13,6 +14,29 @@ import { supabase } from '@/lib/supabase';
 import { useToday, type DayLog } from '@/lib/today';
 
 const GRAMS_PER_OUNCE = 28.3495;
+
+const MEALS = [
+  { key: 'breakfast', title: 'BREAKFAST' },
+  { key: 'lunch', title: 'LUNCH' },
+  { key: 'dinner', title: 'DINNER' },
+  { key: 'snack', title: 'SNACKS' },
+] as const;
+
+// Today's food split into breakfast, lunch, dinner and snacks (always shown, so you
+// can see what's still to come); anything without a meal goes in "Other" at the end.
+function mealGroups(logs: DayLog[]) {
+  const known: readonly string[] = MEALS.map((meal) => meal.key);
+  const groups = [
+    ...MEALS.map((meal) => ({ ...meal, logs: logs.filter((log) => log.meal_type === meal.key) })),
+    { key: 'other', title: 'OTHER', logs: logs.filter((log) => !known.includes(log.meal_type ?? '')) },
+  ];
+  return groups
+    .filter((group) => group.key !== 'other' || group.logs.length > 0)
+    .map((group) => ({
+      ...group,
+      kcal: group.logs.reduce((sum, log) => sum + Number(log.energy_kcal), 0),
+    }));
+}
 
 // 8 x 9 pixel rubbish bin: lid with handle, then a can with stripes
 const BIN = toPixelRows(
@@ -35,6 +59,7 @@ export default function HomeScreen() {
   const { profile } = useProfile();
   const { totals, logs, error, load } = useToday();
   const [refreshing, setRefreshing] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const imperial = profile?.unit_system === 'imperial';
   const baseGoal = totals?.daily_calorie_goal ?? profile?.daily_calorie_goal ?? 0;
   const burned = Math.round(Number(totals?.burned_kcal ?? 0));
@@ -93,7 +118,19 @@ export default function HomeScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.navy} />
         }>
         <View style={styles.greeting}>
-          <LiloMoodArt mood={goalHit ? 'goal' : 'welcome'} pixelSize={2} bob />
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Menu"
+            accessibilityHint="Opens settings, themes and account"
+            onPress={() => setMenuOpen(true)}
+            style={({ pressed }) => [styles.liloButton, pressed && styles.binPressed]}>
+            <View aria-hidden pointerEvents="none">
+              <LiloMoodArt mood={goalHit ? 'goal' : 'welcome'} pixelSize={2} bob />
+            </View>
+            <Text style={styles.menuHint} aria-hidden>
+              MENU ▾
+            </Text>
+          </Pressable>
           <View style={styles.greetingText}>
             <Text style={styles.hello} accessibilityRole="header">
               Hi, {profile?.display_name ?? 'player'}!
@@ -141,47 +178,48 @@ export default function HomeScreen() {
               <Text style={styles.emptyText}>Nothing logged yet. Tell Lilo what you ate!</Text>
             </View>
           )}
-          {logs.map((log) => (
-            <View key={log.id} style={styles.foodRow}>
-              <View style={styles.foodText}>
-                <Text style={styles.foodName}>{log.food_name}</Text>
-                <Text style={styles.subtle}>{amountText(log, imperial)}</Text>
-              </View>
-              <Text style={styles.foodKcal}>{withCommas(Number(log.energy_kcal))} kcal</Text>
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={`Delete ${log.food_name}`}
-                hitSlop={4}
-                onPress={() => deleteLog(log)}
-                style={({ pressed }) => [styles.binButton, pressed && styles.binPressed]}>
-                <View aria-hidden>
-                  <PixelArt rows={BIN} pixelSize={2} />
+          {logs.length > 0 &&
+            mealGroups(logs).map((group) => (
+              <View key={group.key} style={styles.mealGroup}>
+                <View style={styles.mealHeader}>
+                  <Text style={styles.mealTitle} accessibilityRole="header">
+                    {group.title}
+                  </Text>
+                  {group.logs.length > 0 && (
+                    <Text style={styles.mealKcal}>{withCommas(group.kcal)} kcal</Text>
+                  )}
                 </View>
-              </Pressable>
-            </View>
-          ))}
+                {group.logs.length === 0 && <Text style={styles.mealEmpty}>Nothing yet</Text>}
+                {group.logs.map((log) => (
+                  <View key={log.id} style={styles.foodRow}>
+                    <View style={styles.foodText}>
+                      <Text style={styles.foodName}>{log.food_name}</Text>
+                      <Text style={styles.subtle}>{amountText(log, imperial)}</Text>
+                    </View>
+                    <Text style={styles.foodKcal}>{withCommas(Number(log.energy_kcal))} kcal</Text>
+                    <Pressable
+                      accessibilityRole="button"
+                      accessibilityLabel={`Delete ${log.food_name}`}
+                      hitSlop={4}
+                      onPress={() => deleteLog(log)}
+                      style={({ pressed }) => [styles.binButton, pressed && styles.binPressed]}>
+                      <View aria-hidden>
+                        <PixelArt rows={BIN} pixelSize={2} />
+                      </View>
+                    </Pressable>
+                  </View>
+                ))}
+              </View>
+            ))}
         </View>
 
-        <View style={styles.footer}>
-          <Pressable
-            accessibilityRole="button"
-            onPress={() => router.push('/setup')}
-            style={styles.linkButton}>
-            <Text style={styles.linkText}>Retake survey</Text>
-          </Pressable>
-          <Pressable
-            accessibilityRole="button"
-            onPress={() => supabase.auth.signOut()}
-            style={styles.linkButton}>
-            <Text style={styles.linkText}>Sign out</Text>
-          </Pressable>
-        </View>
         <Text style={styles.credit}>
           Food data: UK CoFID 2021 (Open Government Licence v3.0) and U.S. Department of
           Agriculture FoodData Central.
         </Text>
       </ScrollView>
       <PeekingLilo side="right" pixelSize={5} />
+      <LiloMenu open={menuOpen} onClose={() => setMenuOpen(false)} />
     </SafeAreaView>
   );
 }
@@ -266,6 +304,33 @@ const styles = StyleSheet.create({
     color: colors.plum,
     textAlign: 'center',
   },
+  mealGroup: {
+    gap: 8,
+  },
+  mealHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'baseline',
+    marginTop: 4,
+    paddingBottom: 4,
+    borderBottomWidth: 2,
+    borderBottomColor: colors.navy,
+  },
+  mealTitle: {
+    fontFamily: fonts.pixel,
+    fontSize: 9,
+    color: colors.navy,
+  },
+  mealKcal: {
+    fontFamily: fonts.bodyHeavy,
+    fontSize: 14,
+    color: colors.plum,
+  },
+  mealEmpty: {
+    fontFamily: fonts.body,
+    fontSize: 13,
+    color: colors.plum,
+  },
   foodRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -302,19 +367,14 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: colors.navy,
   },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  liloButton: {
+    alignItems: 'center',
+    gap: 4,
   },
-  linkButton: {
-    minHeight: 44,
-    justifyContent: 'center',
-  },
-  linkText: {
-    fontFamily: fonts.bodyHeavy,
-    fontSize: 14,
-    color: colors.berry,
-    textDecorationLine: 'underline',
+  menuHint: {
+    fontFamily: fonts.pixel,
+    fontSize: 7,
+    color: colors.plum,
   },
   credit: {
     fontFamily: fonts.body,

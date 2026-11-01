@@ -231,13 +231,13 @@ const styles = StyleSheet.create({
   stat: {
     fontFamily: fonts.bodyHeavy,
     fontSize: 10,
-    color: colors.navy,
+    color: colors.onAccent,
   },
   title: {
     fontFamily: fonts.pixel,
     fontSize: 9,
     lineHeight: 14,
-    color: colors.navy,
+    color: colors.onAccent,
   },
   art: {
     height: 104,
@@ -258,13 +258,13 @@ const styles = StyleSheet.create({
     fontFamily: fonts.bodyBold,
     fontSize: 11,
     lineHeight: 15,
-    color: colors.navy,
+    color: colors.onAccent,
   },
   cta: {
     fontFamily: fonts.pixel,
     fontSize: 7,
     textAlign: 'center',
-    color: colors.navy,
+    color: colors.onAccent,
     borderTopWidth: 2,
     borderStyle: 'dashed',
     borderColor: 'rgba(27,27,58,0.35)',

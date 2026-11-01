@@ -856,6 +856,6 @@ const styles = StyleSheet.create({
   sendText: {
     fontFamily: fonts.pixel,
     fontSize: 14,
-    color: colors.navy,
+    color: colors.onAccent,
   },
 });

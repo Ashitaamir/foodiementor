@@ -57,7 +57,7 @@ function AppReady() {
 export default function RootLayout() {
   return (
     <SessionProvider>
-      <StatusBar style="dark" />
+      <StatusBar style={colors.statusBar} />
       <AppReady />
     </SessionProvider>
   );

@@ -15,7 +15,7 @@ const ICON_ROWS = Object.fromEntries(
   Object.entries(ICONS).map(([name, map]) => [
     name,
     {
-      active: toPixelRows(map, { O: colors.navy }),
+      active: toPixelRows(map, { O: colors.onAccent }),
       inactive: toPixelRows(map, { O: colors.placeholder }),
     },
   ]),
@@ -102,7 +102,7 @@ const styles = StyleSheet.create({
   label: {
     fontFamily: fonts.pixel,
     fontSize: 8,
-    color: colors.navy,
+    color: colors.onAccent,
   },
   labelInactive: {
     color: colors.placeholder,

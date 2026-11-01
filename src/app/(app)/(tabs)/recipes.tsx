@@ -12,8 +12,8 @@ import { supabase } from '@/lib/supabase';
 
 const NEW_BUTTONS: { mode: LogMode; label: string; color: string }[] = [
   { mode: 'recipe', label: '+ Recipe', color: colors.leafGreen },
-  { mode: 'batch', label: '+ Meal prep', color: '#5CC8FF' },
-  { mode: 'instagram', label: '+ From Insta', color: '#B07CFF' },
+  { mode: 'batch', label: '+ Meal prep', color: colors.sky },
+  { mode: 'instagram', label: '+ From Insta', color: colors.grape },
 ];
 
 function tagFor(recipe: SavedRecipe) {
@@ -165,7 +165,7 @@ const styles = StyleSheet.create({
     boxShadow: `3px 3px 0 ${colors.navy}`,
   },
   pressed: { transform: [{ translateX: 2 }, { translateY: 2 }], boxShadow: `1px 1px 0 ${colors.navy}` },
-  newText: { fontFamily: fonts.bodyHeavy, fontSize: 14, color: colors.navy },
+  newText: { fontFamily: fonts.bodyHeavy, fontSize: 14, color: colors.onAccent },
   error: { fontFamily: fonts.bodyBold, fontSize: 14, color: colors.berry, textAlign: 'center' },
   empty: { alignItems: 'center', gap: 10, paddingVertical: 24 },
   emptyText: { fontFamily: fonts.bodyBold, fontSize: 15, color: colors.plum, textAlign: 'center' },

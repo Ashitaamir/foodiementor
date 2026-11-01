@@ -83,6 +83,6 @@ const styles = StyleSheet.create({
     color: colors.plum,
   },
   hintSelected: {
-    color: '#D9D6F2',
+    color: colors.onInkMuted,
   },
 });

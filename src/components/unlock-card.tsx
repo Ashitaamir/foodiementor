@@ -192,13 +192,13 @@ const styles = StyleSheet.create({
   number: {
     fontFamily: fonts.pixel,
     fontSize: 28,
-    color: colors.navy,
+    color: colors.onAccent,
   },
   title: {
     fontFamily: fonts.pixel,
     fontSize: 14,
     lineHeight: 22,
-    color: colors.navy,
+    color: colors.onAccent,
   },
   detail: {
     fontFamily: fonts.bodyBold,
@@ -229,7 +229,7 @@ const styles = StyleSheet.create({
   playText: {
     fontFamily: fonts.pixel,
     fontSize: 14,
-    color: colors.navy,
+    color: colors.onAccent,
   },
   back: {
     minHeight: 44,
@@ -239,7 +239,7 @@ const styles = StyleSheet.create({
   backText: {
     fontFamily: fonts.bodyHeavy,
     fontSize: 16,
-    color: colors.cream,
+    color: '#FFF8F0',
     textDecorationLine: 'underline',
   },
 });
