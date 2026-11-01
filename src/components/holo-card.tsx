@@ -11,7 +11,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
-import { Mochi } from '@/components/mochi';
+import { Lilo } from '@/components/lilo';
 import { colors, fonts } from '@/constants/fm-theme';
 
 const CARD_WIDTH = 160;
@@ -171,7 +171,7 @@ export function HoloCard({
             </View>
             <Text style={styles.title}>{title}</Text>
             <View style={styles.art}>
-              <Mochi pixelSize={5} />
+              <Lilo pixelSize={5} />
               <View style={[styles.spark, { left: 12, top: 14, backgroundColor: colors.arcadeYellow }]} />
               <View style={[styles.spark, { right: 14, bottom: 16, backgroundColor: colors.cream }]} />
             </View>

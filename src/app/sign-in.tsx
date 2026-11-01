@@ -15,7 +15,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { CardStack } from '@/components/card-stack';
 import { HoloCard } from '@/components/holo-card';
-import { Mochi } from '@/components/mochi';
+import { Lilo } from '@/components/lilo';
 import { colors, fonts } from '@/constants/fm-theme';
 import { supabase } from '@/lib/supabase';
 
@@ -152,7 +152,7 @@ export default function SignInScreen() {
           scrollEnabled={!!mode}
           contentContainerStyle={[styles.content, !mode && styles.contentCentered]}
           keyboardShouldPersistTaps="handled">
-          <Mochi pixelSize={mode ? 4 : 6} bob />
+          <Lilo pixelSize={mode ? 4 : 6} bob />
 
           <View style={styles.titleBlock}>
             <Text style={styles.title} accessibilityRole="header">

@@ -6,6 +6,39 @@
 alter table public.profiles
   add column time_zone text not null default 'UTC';
 
+-- Food logs also store fibre, calculated from public.foods like the other nutrients
+alter table public.food_logs
+  add column fibre_g numeric(7,2);
+
+create or replace function public.food_logs_fill_nutrients()
+returns trigger
+language plpgsql
+set search_path = ''
+as $$
+declare
+  f record;
+begin
+  select energy_kcal, protein_g, carbs_g, fat_g, fibre_g
+    into f
+    from public.foods
+   where id = new.food_id;
+
+  if not found then
+    raise exception 'Unknown food_id %', new.food_id;
+  end if;
+
+  new.energy_kcal := round(f.energy_kcal * new.grams / 100, 2);
+  new.protein_g   := round(f.protein_g   * new.grams / 100, 2);
+  new.carbs_g     := round(f.carbs_g     * new.grams / 100, 2);
+  new.fat_g       := round(f.fat_g       * new.grams / 100, 2);
+  new.fibre_g     := round(f.fibre_g     * new.grams / 100, 2);
+  return new;
+end;
+$$;
+
+-- Fill in fibre for logs saved before this change (the trigger recalculates each row)
+update public.food_logs set grams = grams;
+
 -- Reject unknown time zones (e.g. typos) so totals can't break
 create or replace function public.profiles_check_time_zone()
 returns trigger

@@ -9,7 +9,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
-// Mochi the lychee, drawn on a 16 x 16 pixel grid (one letter = one pixel):
+// Lilo the lychee, drawn on a 16 x 16 pixel grid (one letter = one pixel):
 // a bumpy pink shell peeled open at the front, showing the white fruit as her face.
 const MAP = [
   '.......gG.......',
@@ -66,7 +66,7 @@ type Props = {
   bob?: boolean;
 };
 
-export function Mochi({ pixelSize = 6, bob = false }: Props) {
+export function Lilo({ pixelSize = 6, bob = false }: Props) {
   const reduceMotion = useReducedMotion();
   const offset = useSharedValue(0);
 
@@ -87,7 +87,7 @@ export function Mochi({ pixelSize = 6, bob = false }: Props) {
     <Animated.View
       accessible
       accessibilityRole="image"
-      accessibilityLabel="Mochi the lychee, the FoodieMentor mascot"
+      accessibilityLabel="Lilo the lychee, the FoodieMentor mascot"
       style={[{ width: pixelSize * GRID_WIDTH, height: pixelSize * GRID_HEIGHT }, bobStyle]}>
       {ROWS.map((runs, rowIndex) => (
         <View key={rowIndex} style={styles.row}>
