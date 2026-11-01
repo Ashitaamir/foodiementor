@@ -7,6 +7,7 @@ import { withSupabase } from "npm:@supabase/server@1";
 const MODEL = "claude-haiku-5-5";
 const MAX_TEXT_LENGTH = 500;
 const MAX_ITEMS = 10;
+const MIN_MATCH_SCORE = 0.5;
 const UNITLESS = new Set(["", "piece", "pieces", "whole"]);
 const GRAM_UNITS = new Set(["g", "gram", "grams"]);
 
@@ -139,9 +140,15 @@ export default {
         said: item.name,
         quantity,
         unit,
-        status: grams === null ? "needs_portion" : "ready",
+        status:
+          best.match_score < MIN_MATCH_SCORE ? "check_match"
+            : grams === null ? "needs_portion"
+              : "ready",
         food: { id: best.id, name: best.name, match_score: best.match_score },
-        alternatives: matches.slice(1).map((m) => ({ id: m.id, name: m.name })),
+        alternatives: matches
+          .slice(1)
+          .filter((m) => m.match_score >= MIN_MATCH_SCORE)
+          .map((m) => ({ id: m.id, name: m.name })),
         portion: portion && { id: portion.id, label: portion.label },
         portions: portions.map((p) => ({ id: p.id, label: p.label })),
         grams,
