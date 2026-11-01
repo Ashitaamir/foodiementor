@@ -94,15 +94,19 @@ def main(xlsx_path, out_path):
 
     get = lambda r, f: r[COLS[f][0]] if COLS[f][0] < len(r) else ""
     seen, values = set(), []
-    skipped = {"no kcal": 0, "alcoholic (per 100 ml)": 0, "duplicate code": 0}
+    skipped = {"no kcal": 0, "alcoholic (per 100 ml)": 0}
 
     for r in rows[3:]:  # rows 1-3 are headers
         code = get(r, "code")
         if not code:
             continue
         if code in seen:
-            skipped["duplicate code"] += 1
-            continue
+            # CoFID 2021 reuses one code for two different foods (13-669:
+            # roasted aubergine and raw watercress). Keep both; mark ours.
+            n = 2
+            while f"{code}-dup{n}" in seen:
+                n += 1
+            code = f"{code}-dup{n}"
         if get(r, "group").startswith("Q"):
             skipped["alcoholic (per 100 ml)"] += 1
             continue
