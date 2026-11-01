@@ -17,7 +17,7 @@ if [[ -z "$URL" || -z "$KEY" ]]; then
   exit 1
 fi
 
-TEXT=${1:-"2 rotis and a bowl of dal"}
+TEXT=${1-"2 rotis and a bowl of dal"}
 read "EMAIL?Test user email: "
 read -s "PW?Test user password: "
 echo
@@ -38,9 +38,20 @@ print(data["access_token"])
 ')
 
 # 2. Call parse-meal
-RESPONSE=$(curl -s -w "\n%{http_code}" "$URL/functions/v1/parse-meal" \
+RESPONSE=$(python3 -c '
+import base64, json, os, sys
+body = {"text": sys.argv[1]}
+path = os.environ.get("IMAGE")
+if path:
+    types = {".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png", ".webp": "image/webp"}
+    ext = os.path.splitext(path)[1].lower()
+    if ext not in types:
+        sys.exit("IMAGE must be a .jpg, .jpeg, .png or .webp file")
+    body["image"] = {"media_type": types[ext], "data": base64.b64encode(open(os.path.expanduser(path), "rb").read()).decode()}
+print(json.dumps(body))
+' "$TEXT" | curl -s -w "\n%{http_code}" "$URL/functions/v1/parse-meal" \
   -H "Authorization: Bearer $TOKEN" -H "apikey: $KEY" -H "Content-Type: application/json" \
-  -d "$(python3 -c 'import json,sys; print(json.dumps({"text": sys.argv[1]}))' "$TEXT")")
+  --data-binary @-)
 STATUS=${RESPONSE##*$'\n'}
 BODY=${RESPONSE%$'\n'*}
 echo "HTTP $STATUS"
@@ -53,10 +64,11 @@ if [[ "${SAVE:-0}" == "1" ]]; then
   ROWS=$(echo "$BODY" | python3 -c '
 import json, sys
 rows = []
-for item in json.load(sys.stdin)["items"]:
+data = json.load(sys.stdin)
+for item in data["items"]:
     if item["status"] != "ready":
         continue  # e.g. "bowl of dal" needs a size first, so it is not saved
-    row = {"food_id": item["food"]["id"], "status": "confirmed", "input_method": "chat"}
+    row = {"food_id": item["food"]["id"], "status": "confirmed", "input_method": data.get("input_method", "chat")}
     if item["portion"]:
         row.update(portion_id=item["portion"]["id"], portion_count=item["quantity"])
     else:

@@ -8,6 +8,8 @@ const MODEL = "claude-haiku-5-5";
 const MAX_TEXT_LENGTH = 500;
 const MAX_ITEMS = 10;
 const MIN_MATCH_SCORE = 0.5;
+const MAX_IMAGE_BASE64_LENGTH = 5_000_000; // ~3.7 MB photo; the app should shrink photos first
+const IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 const UNITLESS = new Set(["", "piece", "pieces", "whole"]);
 const GRAM_UNITS = new Set(["g", "gram", "grams"]);
 
@@ -21,7 +23,9 @@ For each food or drink, return:
 - quantity: how many, as a number (1 if not stated, 0.5 for "half")
 - unit: the unit word the user used, e.g. "cup", "bowl", "plate", "g", or "" if none
 Never estimate calories, grams or nutrition. Ignore anything that is not food or drink.
-If the text contains no food, return an empty list.`;
+If the text contains no food, return an empty list.
+If a photo is included, list only foods you can actually see, plus any the user mentions.
+For photos, set quantity to the number of pieces you can count, or your best guess in cups for rice, dal and curries (unit "cup").`;
 
 const OUTPUT_SCHEMA = {
   type: "object",
@@ -45,8 +49,28 @@ const OUTPUT_SCHEMA = {
 };
 
 type ParsedItem = { name: string; quantity: number; unit: string };
+type ImageInput = { media_type: "image/jpeg" | "image/png" | "image/webp"; data: string };
 
-async function parseWithClaude(text: string): Promise<ParsedItem[] | null> {
+// Accept only a JPEG/PNG/WebP photo (base64) within the size limit
+function readImage(value: unknown): ImageInput | null {
+  if (!value || typeof value !== "object") return null;
+  const { media_type, data } = value as Record<string, unknown>;
+  if (typeof media_type !== "string" || !IMAGE_TYPES.has(media_type)) return null;
+  if (typeof data !== "string" || !data || data.length > MAX_IMAGE_BASE64_LENGTH) return null;
+  return { media_type: media_type as ImageInput["media_type"], data };
+}
+
+async function parseWithClaude(text: string, image: ImageInput | null): Promise<ParsedItem[] | null> {
+  const textBlock = { type: "text" as const, text: text || "What foods are in this photo?" };
+  const content = image
+    ? [
+        {
+          type: "image" as const,
+          source: { type: "base64" as const, media_type: image.media_type, data: image.data },
+        },
+        textBlock,
+      ]
+    : [textBlock];
   const response = await anthropic.messages.create({
     model: MODEL,
     max_tokens: 2000,
@@ -55,7 +79,7 @@ async function parseWithClaude(text: string): Promise<ParsedItem[] | null> {
       effort: "low",
       format: { type: "json_schema", schema: OUTPUT_SCHEMA },
     },
-    messages: [{ role: "user", content: text }],
+    messages: [{ role: "user", content }],
   });
   if (response.stop_reason !== "end_turn") return null; // refusal, cut off, etc.
   const block = response.content.find((b) => b.type === "text");
@@ -67,9 +91,16 @@ export default {
   fetch: withSupabase({ auth: "user" }, async (req, ctx) => {
     const body = await req.json().catch(() => null);
     const text = typeof body?.text === "string" ? body.text.trim() : "";
-    if (!text || text.length > MAX_TEXT_LENGTH) {
+    const image = readImage(body?.image);
+    if (body?.image && !image) {
       return Response.json(
-        { error: `Please describe your meal in 1-${MAX_TEXT_LENGTH} characters.` },
+        { error: "Photo must be a JPEG, PNG or WebP under about 3.5 MB." },
+        { status: 400 },
+      );
+    }
+    if ((!text && !image) || text.length > MAX_TEXT_LENGTH) {
+      return Response.json(
+        { error: `Please describe your meal (up to ${MAX_TEXT_LENGTH} characters) or add a photo.` },
         { status: 400 },
       );
     }
@@ -87,7 +118,7 @@ export default {
     // 1. Claude: split the text into foods (names + amounts only)
     let parsed: ParsedItem[] | null;
     try {
-      parsed = await parseWithClaude(text);
+      parsed = await parseWithClaude(text, image);
     } catch (error) {
       if (error instanceof Anthropic.RateLimitError) {
         return Response.json({ error: "The assistant is busy, please try again." }, { status: 429 });
@@ -157,6 +188,10 @@ export default {
       });
     }
 
-    return Response.json({ items, notice: "AI estimate, please check" });
+    return Response.json({
+      items,
+      input_method: image ? "scan" : "chat",
+      notice: "AI estimate, please check",
+    });
   }),
 };
