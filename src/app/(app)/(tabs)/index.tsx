@@ -1,17 +1,24 @@
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { CalorieBar, withCommas } from '@/components/calorie-bar';
 import { LiloMoodArt, PeekingLilo } from '@/components/lilo';
 import { LogConsole } from '@/components/log-console';
+import { PixelArt, toPixelRows } from '@/components/pixel-art';
 import { colors, fonts } from '@/constants/fm-theme';
 import { useProfile } from '@/lib/profile';
 import { supabase } from '@/lib/supabase';
 import { useToday, type DayLog } from '@/lib/today';
 
 const GRAMS_PER_OUNCE = 28.3495;
+
+// 8 x 9 pixel rubbish bin: lid with handle, then a can with stripes
+const BIN = toPixelRows(
+  ['..OOOO..', 'OOOOOOOO', '........', '.OOOOOO.', '.O.O.OO.', '.O.O.OO.', '.O.O.OO.', '.O.O.OO.', '..OOOO..'],
+  { O: colors.berry },
+);
 
 function amountText(log: DayLog, imperial: boolean) {
   const weight = imperial
@@ -44,6 +51,26 @@ export default function HomeScreen() {
       load();
     }, [load]),
   );
+
+  // Ask first, then remove the entry; totals and the list reload from the database
+  const deleteLog = (log: DayLog) => {
+    Alert.alert('Delete this food?', `"${log.food_name}" will be removed from today.`, [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: async () => {
+          const { error: deleteError } = await supabase.from('food_logs').delete().eq('id', log.id);
+          if (deleteError) {
+            console.warn('Deleting log failed:', deleteError.code, deleteError.message);
+            Alert.alert('Could not delete', 'Please try again.');
+            return;
+          }
+          load();
+        },
+      },
+    ]);
+  };
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -121,6 +148,16 @@ export default function HomeScreen() {
                 <Text style={styles.subtle}>{amountText(log, imperial)}</Text>
               </View>
               <Text style={styles.foodKcal}>{withCommas(Number(log.energy_kcal))} kcal</Text>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={`Delete ${log.food_name}`}
+                hitSlop={4}
+                onPress={() => deleteLog(log)}
+                style={({ pressed }) => [styles.binButton, pressed && styles.binPressed]}>
+                <View aria-hidden>
+                  <PixelArt rows={BIN} pixelSize={2} />
+                </View>
+              </Pressable>
             </View>
           ))}
         </View>
@@ -247,6 +284,18 @@ const styles = StyleSheet.create({
     fontFamily: fonts.bodyHeavy,
     fontSize: 15,
     color: colors.navy,
+  },
+  binButton: {
+    width: 40,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: colors.berry,
+    backgroundColor: colors.background,
+  },
+  binPressed: {
+    transform: [{ translateY: 2 }],
   },
   foodKcal: {
     fontFamily: fonts.bodyHeavy,
