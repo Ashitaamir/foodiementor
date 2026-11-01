@@ -1,5 +1,6 @@
 import { createContext, use, useCallback, useEffect, useState, type PropsWithChildren } from 'react';
 
+import type { Activity, Gender, WeightGoal, Workouts } from '@/lib/calorie-goal';
 import { useSession } from '@/lib/session';
 import { supabase } from '@/lib/supabase';
 
@@ -10,7 +11,22 @@ export type Profile = {
   unit_system: 'metric' | 'imperial';
   time_zone: string;
   ai_training_opt_in: boolean;
+  // Onboarding survey answers (private; never sent to the AI)
+  birth_year: number | null;
+  gender: Gender | null;
+  height_cm: number | null;
+  weight_kg: number | null;
+  activity_level: Activity | null;
+  workouts_per_week: Workouts | null;
+  weight_goal: WeightGoal | null;
+  goal_rate_kg_week: number | null;
+  add_burned_calories: boolean;
 };
+
+const PROFILE_COLUMNS =
+  'id, display_name, daily_calorie_goal, unit_system, time_zone, ai_training_opt_in, ' +
+  'birth_year, gender, height_cm, weight_kg, activity_level, workouts_per_week, weight_goal, ' +
+  'goal_rate_kg_week, add_burned_calories';
 
 type ProfileState = {
   profile: Profile | null;
@@ -47,7 +63,7 @@ export function ProfileProvider({ children }: PropsWithChildren) {
     }
     const { data, error: loadError } = await supabase
       .from('profiles')
-      .select('id, display_name, daily_calorie_goal, unit_system, time_zone, ai_training_opt_in')
+      .select(PROFILE_COLUMNS)
       .eq('id', userId)
       .single();
     setProfile(data as Profile | null);

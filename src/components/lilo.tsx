@@ -1,5 +1,4 @@
 import { useEffect } from 'react';
-import { StyleSheet, View } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useReducedMotion,
@@ -8,6 +7,8 @@ import Animated, {
   withSequence,
   withTiming,
 } from 'react-native-reanimated';
+
+import { PixelArt, toPixelRows } from '@/components/pixel-art';
 
 // Lilo the lychee, drawn on a 16 x 16 pixel grid (one letter = one pixel):
 // a bumpy pink shell peeled open at the front, showing the white fruit as her face.
@@ -45,21 +46,7 @@ const COLORS: Record<string, string> = {
 
 const GRID_WIDTH = MAP[0].length;
 const GRID_HEIGHT = MAP.length;
-
-// Merge neighbouring pixels of the same colour into one block per row (fewer views to draw)
-const ROWS = MAP.map((row) => {
-  const runs: { color: string | null; length: number }[] = [];
-  for (const char of row) {
-    const color = COLORS[char] ?? null;
-    const last = runs[runs.length - 1];
-    if (last && last.color === color) {
-      last.length += 1;
-    } else {
-      runs.push({ color, length: 1 });
-    }
-  }
-  return runs;
-});
+const ROWS = toPixelRows(MAP, COLORS);
 
 type Props = {
   pixelSize?: number;
@@ -89,26 +76,7 @@ export function Lilo({ pixelSize = 6, bob = false }: Props) {
       accessibilityRole="image"
       accessibilityLabel="Lilo the lychee, the FoodieMentor mascot"
       style={[{ width: pixelSize * GRID_WIDTH, height: pixelSize * GRID_HEIGHT }, bobStyle]}>
-      {ROWS.map((runs, rowIndex) => (
-        <View key={rowIndex} style={styles.row}>
-          {runs.map((run, runIndex) => (
-            <View
-              key={runIndex}
-              style={{
-                width: run.length * pixelSize,
-                height: pixelSize,
-                backgroundColor: run.color ?? 'transparent',
-              }}
-            />
-          ))}
-        </View>
-      ))}
+      <PixelArt rows={ROWS} pixelSize={pixelSize} />
     </Animated.View>
   );
 }
-
-const styles = StyleSheet.create({
-  row: {
-    flexDirection: 'row',
-  },
-});

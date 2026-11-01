@@ -58,10 +58,10 @@ function SignedInNavigator() {
       screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.blush } }}>
       <Stack.Protected guard={complete} redirectTo="/setup">
         <Stack.Screen name="index" />
+        <Stack.Screen name="log" />
       </Stack.Protected>
-      <Stack.Protected guard={!complete} redirectTo="/">
-        <Stack.Screen name="setup" />
-      </Stack.Protected>
+      {/* Open to everyone signed in: first-time setup, or retaking the survey later */}
+      <Stack.Screen name="setup" />
     </Stack>
   );
 }
