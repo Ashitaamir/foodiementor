@@ -69,3 +69,11 @@ print(json.dumps(rows))
     -H "Authorization: Bearer $TOKEN" -H "apikey: $KEY" -H "Content-Type: application/json" \
     -H "Prefer: return=representation" -d "$ROWS" | python3 -m json.tool
 fi
+
+# 4. Optional: show today's totals for the test user (run with TOTALS=1)
+if [[ "${TOTALS:-0}" == "1" ]]; then
+  echo "Today's totals:"
+  curl -s "$URL/rest/v1/rpc/daily_totals" -X POST \
+    -H "Authorization: Bearer $TOKEN" -H "apikey: $KEY" -H "Content-Type: application/json" \
+    -d '{}' | python3 -m json.tool
+fi
