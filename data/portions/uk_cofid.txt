@@ -1,0 +1,45 @@
+# FoodieMentor portion sizes for UK CoFID 2021 foods.
+# Format: CoFID code | CoFID name (checked) | portion label | grams | source | FNDDS food code | default
+# usda_fndds weights are checked against the USDA FNDDS 2021-2023 file by the script.
+
+# --- Breads ---
+11-459 | Chapatis, made without fat | 1 small chapati (6 inch) | 27 | usda_fndds | 51300175 |
+11-459 | Chapatis, made without fat | 1 medium chapati (7 inch) | 40 | usda_fndds | 51300175 | default
+11-459 | Chapatis, made without fat | 1 large chapati (8 inch) | 52 | usda_fndds | 51300175 |
+11-987 | Chapatis, made with fat, retail | 1 small chapati (6 inch) | 27 | usda_fndds | 51300175 |
+11-987 | Chapatis, made with fat, retail | 1 medium chapati (7 inch) | 40 | usda_fndds | 51300175 | default
+11-987 | Chapatis, made with fat, retail | 1 large chapati (8 inch) | 52 | usda_fndds | 51300175 |
+11-1104 | Paratha, homemade | 1 paratha | 70 | usda_fndds | 51300185 | default
+11-911 | Puri, homemade | 1 puri | 36 | usda_fndds | 51300180 | default
+11-973 | Bread, naan, retail | 1 whole naan (10 inch) | 177 | usda_fndds | 51108100 | default
+11-973 | Bread, naan, retail | 1/4 naan | 44 | usda_fndds | 51108100 |
+
+# --- Rice ---
+11-858 | Rice, white, basmati, boiled in unsalted water | 1 cup cooked | 158 | usda_fndds | 56205008 | default
+11-968 | Rice, pilau, plain, homemade | 1 cup | 163 | usda_fndds | 56205002 | default
+19-454 | Biryani, chicken, takeaway | 1 cup | 196 | usda_fndds | 27243100 | default
+19-591 | Curry, lamb biryani, homemade | 1 cup | 196 | usda_fndds | 27213010 | default
+
+# --- Dal (USDA "Dal") ---
+15-764 | Curry, lentil, red/masoor dahl, with vegetable oil, homemade | 1 cup | 240 | usda_fndds | 41305050 | default
+15-763 | Curry, lentil, red/masoor dahl, with butter, homemade | 1 cup | 240 | usda_fndds | 41305050 | default
+15-641 | Curry, chick pea dhal, homemade | 1 cup | 240 | usda_fndds | 41305050 | default
+15-768 | Curry, mung bean dahl, Bengali, homemade | 1 cup | 240 | usda_fndds | 41305050 | default
+15-780 | Curry, pigeon pea dahl, with vegetable oil, homemade | 1 cup | 240 | usda_fndds | 41305050 | default
+
+# --- Curries (USDA "Chicken curry") ---
+19-322 | Curry, chicken, average, takeaway | 1 cup | 240 | usda_fndds | 27146150 | default
+19-296 | Curry, chicken tikka masala, retail, reheated | 1 cup | 240 | usda_fndds | 27146150 | default
+19-565 | Curry, chicken korma, homemade | 1 cup | 240 | usda_fndds | 27146150 | default
+
+# --- Snacks ---
+15-305 | Samosas, vegetable, retail | 1 small samosa | 25 | usda_fndds | 58124500 |
+15-305 | Samosas, vegetable, retail | 1 samosa | 75 | usda_fndds | 58124500 | default
+15-305 | Samosas, vegetable, retail | 1 large samosa | 100 | usda_fndds | 58124500 |
+19-326 | Meat samosas, takeaway | 1 small samosa | 25 | usda_fndds | 58124500 |
+19-326 | Meat samosas, takeaway | 1 samosa | 75 | usda_fndds | 58124500 | default
+19-326 | Meat samosas, takeaway | 1 large samosa | 100 | usda_fndds | 58124500 |
+15-620 | Pakora, vegetable, takeaway and restaurant | 1 pakora | 12 | usda_fndds | 75440400 | default
+
+# --- Fats ---
+17-640 | Ghee, butter | 1 tablespoon | 14 | usda_fndds | 81204000 | default
