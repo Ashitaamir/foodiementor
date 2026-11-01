@@ -45,3 +45,27 @@ STATUS=${RESPONSE##*$'\n'}
 BODY=${RESPONSE%$'\n'*}
 echo "HTTP $STATUS"
 echo "$BODY" | python3 -m json.tool 2>/dev/null || echo "$BODY"
+
+# 3. Optional: save the "ready" items as confirmed food logs (run with SAVE=1).
+#    The app will do the same single request. Calories are calculated by the
+#    database triggers, not taken from this request.
+if [[ "${SAVE:-0}" == "1" ]]; then
+  ROWS=$(echo "$BODY" | python3 -c '
+import json, sys
+rows = []
+for item in json.load(sys.stdin)["items"]:
+    if item["status"] != "ready":
+        continue  # e.g. "bowl of dal" needs a size first, so it is not saved
+    row = {"food_id": item["food"]["id"], "status": "confirmed", "input_method": "chat"}
+    if item["portion"]:
+        row.update(portion_id=item["portion"]["id"], portion_count=item["quantity"])
+    else:
+        row["grams"] = item["grams"]
+    rows.append(row)
+print(json.dumps(rows))
+')
+  echo "Saved:"
+  curl -s "$URL/rest/v1/food_logs?select=grams,energy_kcal,portion_count,status" -X POST \
+    -H "Authorization: Bearer $TOKEN" -H "apikey: $KEY" -H "Content-Type: application/json" \
+    -H "Prefer: return=representation" -d "$ROWS" | python3 -m json.tool
+fi
